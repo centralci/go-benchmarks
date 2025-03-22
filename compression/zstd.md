@@ -5,6 +5,10 @@ This analysis compares two Go implementations of the Zstandard compression algor
 * **klauspost/compress/zstd**: A pure Go implementation
 * **DataDog/zstd**: A CGo wrapper around the official C implementation
 
+# Go Support
+
+See https://github.com/golang/go/issues/62513
+
 ## Benchmark Setup
 
 **Environment**: Apple M1 Pro (darwin/arm64)
