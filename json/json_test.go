@@ -12,6 +12,9 @@ import (
 // Initialize the faker once
 var faker = gofakeit.New(0)
 
+// Set up sonic with fastest configuration
+var sonicFastest = sonic.ConfigFastest
+
 // A more reliable approach to generate test data
 type TestData struct {
 	ID          int      `json:"id"`
@@ -198,6 +201,27 @@ func BenchmarkSonicMarshal1MB(b *testing.B) {
 	b.SetBytes(int64(len(jsonData1MB)))
 }
 
+func BenchmarkSonicFastestMarshal1MB(b *testing.B) {
+	// First unmarshal the data to a Go structure
+	var data []TestData
+	err := json.Unmarshal(jsonData1MB, &data)
+	if err != nil {
+		b.Fatalf("Failed to unmarshal test data: %v", err)
+	}
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_, err := sonicFastest.Marshal(data)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	b.SetBytes(int64(len(jsonData1MB)))
+}
+
 func BenchmarkStdJSONUnmarshal1MB(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -220,6 +244,21 @@ func BenchmarkSonicUnmarshal1MB(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var result []TestData
 		err := sonic.Unmarshal(jsonData1MB, &result)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	b.SetBytes(int64(len(jsonData1MB)))
+}
+
+func BenchmarkSonicFastestUnmarshal1MB(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		var result []TestData
+		err := sonicFastest.Unmarshal(jsonData1MB, &result)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -271,6 +310,27 @@ func BenchmarkSonicMarshal10MB(b *testing.B) {
 	b.SetBytes(int64(len(jsonData10MB)))
 }
 
+func BenchmarkSonicFastestMarshal10MB(b *testing.B) {
+	// First unmarshal the data to a Go structure
+	var data []TestData
+	err := json.Unmarshal(jsonData10MB, &data)
+	if err != nil {
+		b.Fatalf("Failed to unmarshal test data: %v", err)
+	}
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_, err := sonicFastest.Marshal(data)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	b.SetBytes(int64(len(jsonData10MB)))
+}
+
 func BenchmarkStdJSONUnmarshal10MB(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -293,6 +353,21 @@ func BenchmarkSonicUnmarshal10MB(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var result []TestData
 		err := sonic.Unmarshal(jsonData10MB, &result)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	b.SetBytes(int64(len(jsonData10MB)))
+}
+
+func BenchmarkSonicFastestUnmarshal10MB(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		var result []TestData
+		err := sonicFastest.Unmarshal(jsonData10MB, &result)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -344,6 +419,27 @@ func BenchmarkSonicMarshal100MB(b *testing.B) {
 	b.SetBytes(int64(len(jsonData100MB)))
 }
 
+func BenchmarkSonicFastestMarshal100MB(b *testing.B) {
+	// First unmarshal the data to a Go structure
+	var data []TestData
+	err := json.Unmarshal(jsonData100MB, &data)
+	if err != nil {
+		b.Fatalf("Failed to unmarshal test data: %v", err)
+	}
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_, err := sonicFastest.Marshal(data)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	b.SetBytes(int64(len(jsonData100MB)))
+}
+
 func BenchmarkStdJSONUnmarshal100MB(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -366,6 +462,21 @@ func BenchmarkSonicUnmarshal100MB(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var result []TestData
 		err := sonic.Unmarshal(jsonData100MB, &result)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	b.SetBytes(int64(len(jsonData100MB)))
+}
+
+func BenchmarkSonicFastestUnmarshal100MB(b *testing.B) {
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		var result []TestData
+		err := sonicFastest.Unmarshal(jsonData100MB, &result)
 		if err != nil {
 			b.Fatal(err)
 		}
