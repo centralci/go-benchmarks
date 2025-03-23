@@ -22,9 +22,74 @@ The benchmarks evaluate performance across different access patterns:
 
 ## Compression
 
-Compares different compression implementations in Go:
+The compression benchmarks compare the performance of different compression libraries available in Go across various
+scenarios to help you make informed decisions about which implementation to use for specific workloads.
 
-- zstd compression - klauspost vs datadog (Cgo)
+### ZSTD Compression Benchmarks
+
+Compares different ZSTD implementations in Go:
+
+- [Klauspost's native Go implementation](https://github.com/klauspost/compress) (github.com/klauspost/compress/zstd)
+- [DataDog's CGO wrapper](https://github.com/DataDog/zstd) (github.com/DataDog/zstd)
+
+The benchmarks evaluate:
+
+- **Compression Speed**: At multiple compression levels (1, 3, and 7)
+- **Decompression Speed**: For data compressed at different levels
+- **Compression Ratio**: Measuring the effectiveness of compression
+- **Data Types**: Testing different content types (text, binary, random) to simulate real-world data
+- **Data Sizes**: Small (1MB), Medium (10MB), and Large (100MB) payloads
+
+### GZIP Compression Benchmarks
+
+Compares different GZIP implementations in Go:
+
+- [Klauspost's optimized implementation](https://github.com/klauspost/compress) (github.com/klauspost/compress/gzip)
+- Go standard library (compress/gzip)
+
+The benchmarks evaluate:
+
+- **Compression Speed**: At standard gzip levels (1, 3, and 9)
+- **Decompression Speed**: For data compressed at different levels
+- **Compression Ratio**: Measuring the effectiveness of compression
+- **Data Types**: Testing different content types (text, binary, random)
+- **Data Sizes**: Small (1MB), Medium (10MB), and Large (100MB) payloads
+
+Running specific compression benchmarks:
+
+```bash
+# Run all compression benchmarks
+go test ./compression -bench=.
+
+# Run only ZSTD benchmarks
+go test ./compression -bench=Zstd
+
+# Run only GZIP benchmarks
+go test ./compression -bench=Gzip
+
+# Run only compression performance tests (excluding decompression)
+go test ./compression -bench=Compress
+
+# Run only decompression performance tests
+go test ./compression -bench=Decompress
+
+# Run only compression ratio tests
+go test ./compression -bench=Ratio
+
+# Test specific data sizes
+go test ./compression -bench=1MB    # Small size (1MB)
+go test ./compression -bench=10MB   # Medium size (10MB)
+go test ./compression -bench=100MB  # Large size (100MB)
+
+# Test specific data types
+go test ./compression -bench=Text
+go test ./compression -bench=Binary
+go test ./compression -bench=Random
+
+# Run tests by compression level
+go test ./compression -bench=Level1
+go test ./compression -bench=Level9
+```
 
 ### More Benchmarks Coming Soon
 
@@ -39,6 +104,7 @@ This repository will be expanded with additional benchmarks for:
 ## Requirements
 
 - Go 1.24 or later
+- For DataDog's ZSTD implementation: C compiler (CGO required)
 
 ## Running the Benchmarks
 
@@ -89,26 +155,7 @@ go test ./maps -bench=. -memprofile=mem.prof
 go test ./maps -bench=. -benchtime=5s
 ```
 
-## Viewing Benchmark Results
-
-### Sample Output
-
-```
-goos: linux
-goarch: amd64
-pkg: github.com/yourusername/go-benchmarks/maps
-cpu: Intel(R) Core(TM) i7-9700K CPU @ 3.60GHz
-BenchmarkRWMutexMapReadHeavy-8          10000000               119 ns/op             0 B/op          0 allocs/op
-BenchmarkSyncMapReadHeavy-8             20000000                59.5 ns/op           0 B/op          0 allocs/op
-BenchmarkRWMutexMapWriteHeavy-8          3000000               496 ns/op             0 B/op          0 allocs/op
-BenchmarkSyncMapWriteHeavy-8             1000000              1015 ns/op            78 B/op          1 allocs/op
-BenchmarkRWMutexMapMixedOps-8            5000000               295 ns/op             0 B/op          0 allocs/op
-BenchmarkSyncMapMixedOps-8               2000000               604 ns/op            48 B/op          0 allocs/op
-PASS
-ok      github.com/yourusername/go-benchmarks/maps  10.211s
-```
-
-### Using Benchstat
+## Using Benchstat
 
 For more detailed statistical analysis of benchmark results, use the `benchstat` tool:
 
@@ -123,17 +170,42 @@ go test ./maps -bench=. -count=5 > after.txt
 benchstat before.txt after.txt
 ```
 
+### Compression Benchmark Insights
+
+For compression benchmarks, you should consider:
+
+1. **Throughput (MB/s)**: Higher is better, indicates how fast the library can process data
+2. **Compression Ratio**: Higher is better, indicates how effectively the library reduces data size
+3. **Memory Usage (B/op and allocs/op)**: Lower is better, indicates resource efficiency
+
+Different workloads may prioritize different metrics:
+
+- **Speed-critical applications**: Focus on throughput (MB/s)
+- **Network or storage-constrained applications**: Focus on compression ratio
+- **Memory-constrained environments**: Focus on B/op and allocs/op
+
+Also consider:
+
+- CGO vs pure Go implementations (deployment considerations)
+- Different data types affect compression performance differently
+- Higher compression levels trade speed for better ratios
+
 ## Repository Structure
 
 The repository is organized by benchmark categories:
 
 ```
 go-benchmarks/
-  ├── maps/                  # Map implementation benchmarks
-  │   ├── concurrent_test.go # Concurrent map benchmarks
-  │   └── README.md          # Specific documentation for map benchmarks
-  ├── README.md              # Main repository documentation
-  └── LICENSE                # License file
+  ├── maps/                      # Map implementation benchmarks
+  │   ├── concurrent_test.go     # Concurrent map benchmarks
+  │   └── README.md              # Specific documentation for map benchmarks
+  ├── compression/               # Compression benchmarks
+  │   ├── benchmark_utils.go     # Shared utilities for compression tests
+  │   ├── zstd_test.go           # ZSTD compression benchmarks
+  │   ├── gzip_test.go           # GZIP compression benchmarks 
+  │   └── README.md              # Documentation for compression benchmarks
+  ├── README.md                  # Main repository documentation
+  └── LICENSE                    # License file
 ```
 
 ## Contributing
