@@ -2,11 +2,15 @@ package compression
 
 import (
 	"bytes"
+	"errors"
 	"testing"
 
 	datadog "github.com/DataDog/zstd"
 	klauspost "github.com/klauspost/compress/zstd"
 )
+
+// Error representing that the compression implementation does not support parallel compression
+var ErrNoParallelSupport = errors.New("No parallel support")
 
 // Benchmark Klauspost zstd at different levels
 func BenchmarkKlauspostZstdCompress1MB_Level1(b *testing.B) {
@@ -21,6 +25,19 @@ func BenchmarkKlauspostZstdCompress1MB_Level7(b *testing.B) {
 	benchmarkKlauspostZstdCompress(b, SmallSize, TextData, 7)
 }
 
+// Multi-worker benchmarks - using 4 workers
+func BenchmarkKlauspostZstdCompress1MB_Level1_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, SmallSize, TextData, 1, 4)
+}
+
+func BenchmarkKlauspostZstdCompress1MB_Level3_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, SmallSize, TextData, 3, 4)
+}
+
+func BenchmarkKlauspostZstdCompress1MB_Level7_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, SmallSize, TextData, 7, 4)
+}
+
 func BenchmarkKlauspostZstdCompress10MB_Level1(b *testing.B) {
 	benchmarkKlauspostZstdCompress(b, MediumSize, TextData, 1)
 }
@@ -31,6 +48,19 @@ func BenchmarkKlauspostZstdCompress10MB_Level3(b *testing.B) {
 
 func BenchmarkKlauspostZstdCompress10MB_Level7(b *testing.B) {
 	benchmarkKlauspostZstdCompress(b, MediumSize, TextData, 7)
+}
+
+// Multi-worker benchmarks for 10MB data - using 4 workers
+func BenchmarkKlauspostZstdCompress10MB_Level1_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, MediumSize, TextData, 1, 4)
+}
+
+func BenchmarkKlauspostZstdCompress10MB_Level3_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, MediumSize, TextData, 3, 4)
+}
+
+func BenchmarkKlauspostZstdCompress10MB_Level7_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, MediumSize, TextData, 7, 4)
 }
 
 func BenchmarkKlauspostZstdCompress100MB_Level1(b *testing.B) {
@@ -45,6 +75,19 @@ func BenchmarkKlauspostZstdCompress100MB_Level7(b *testing.B) {
 	benchmarkKlauspostZstdCompress(b, LargeSize, TextData, 7)
 }
 
+// Multi-worker benchmarks for 100MB data - using 4 workers
+func BenchmarkKlauspostZstdCompress100MB_Level1_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, LargeSize, TextData, 1, 4)
+}
+
+func BenchmarkKlauspostZstdCompress100MB_Level3_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, LargeSize, TextData, 3, 4)
+}
+
+func BenchmarkKlauspostZstdCompress100MB_Level7_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, LargeSize, TextData, 7, 4)
+}
+
 func BenchmarkKlauspostZstdCompressBinary1MB_Level1(b *testing.B) {
 	benchmarkKlauspostZstdCompress(b, SmallSize, BinaryData, 1)
 }
@@ -57,6 +100,19 @@ func BenchmarkKlauspostZstdCompressBinary1MB_Level7(b *testing.B) {
 	benchmarkKlauspostZstdCompress(b, SmallSize, BinaryData, 7)
 }
 
+// Multi-worker binary benchmarks
+func BenchmarkKlauspostZstdCompressBinary1MB_Level1_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, SmallSize, BinaryData, 1, 4)
+}
+
+func BenchmarkKlauspostZstdCompressBinary1MB_Level3_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, SmallSize, BinaryData, 3, 4)
+}
+
+func BenchmarkKlauspostZstdCompressBinary1MB_Level7_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, SmallSize, BinaryData, 7, 4)
+}
+
 func BenchmarkKlauspostZstdCompressBinary10MB_Level1(b *testing.B) {
 	benchmarkKlauspostZstdCompress(b, MediumSize, BinaryData, 1)
 }
@@ -67,6 +123,19 @@ func BenchmarkKlauspostZstdCompressBinary10MB_Level3(b *testing.B) {
 
 func BenchmarkKlauspostZstdCompressBinary10MB_Level7(b *testing.B) {
 	benchmarkKlauspostZstdCompress(b, MediumSize, BinaryData, 7)
+}
+
+// Multi-worker binary 10MB benchmarks
+func BenchmarkKlauspostZstdCompressBinary10MB_Level1_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, MediumSize, BinaryData, 1, 4)
+}
+
+func BenchmarkKlauspostZstdCompressBinary10MB_Level3_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, MediumSize, BinaryData, 3, 4)
+}
+
+func BenchmarkKlauspostZstdCompressBinary10MB_Level7_Multi(b *testing.B) {
+	benchmarkKlauspostZstdCompressMulti(b, MediumSize, BinaryData, 7, 4)
 }
 
 // Benchmark Klauspost zstd decompression
@@ -132,63 +201,128 @@ func BenchmarkKlauspostZstdDecompressBinary10MB_Level7(b *testing.B) {
 
 // Benchmark DataDog zstd at different levels
 func BenchmarkDataDogZstdCompress1MB_Level1(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, SmallSize, TextData, 1)
+	benchmarkDataDogZstdCompress(b, SmallSize, TextData, 1, 1)
 }
 
 func BenchmarkDataDogZstdCompress1MB_Level3(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, SmallSize, TextData, 3)
+	benchmarkDataDogZstdCompress(b, SmallSize, TextData, 3, 1)
 }
 
 func BenchmarkDataDogZstdCompress1MB_Level7(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, SmallSize, TextData, 7)
+	benchmarkDataDogZstdCompress(b, SmallSize, TextData, 7, 1)
+}
+
+// Multi-worker DataDog benchmarks - using 4 workers
+func BenchmarkDataDogZstdCompress1MB_Level1_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, SmallSize, TextData, 1, 4)
+}
+
+func BenchmarkDataDogZstdCompress1MB_Level3_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, SmallSize, TextData, 3, 4)
+}
+
+func BenchmarkDataDogZstdCompress1MB_Level7_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, SmallSize, TextData, 7, 4)
 }
 
 func BenchmarkDataDogZstdCompress10MB_Level1(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, MediumSize, TextData, 1)
+	benchmarkDataDogZstdCompress(b, MediumSize, TextData, 1, 1)
 }
 
 func BenchmarkDataDogZstdCompress10MB_Level3(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, MediumSize, TextData, 3)
+	benchmarkDataDogZstdCompress(b, MediumSize, TextData, 3, 1)
 }
 
 func BenchmarkDataDogZstdCompress10MB_Level7(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, MediumSize, TextData, 7)
+	benchmarkDataDogZstdCompress(b, MediumSize, TextData, 7, 1)
+}
+
+// Multi-worker DataDog benchmarks for 10MB
+func BenchmarkDataDogZstdCompress10MB_Level1_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, MediumSize, TextData, 1, 4)
+}
+
+func BenchmarkDataDogZstdCompress10MB_Level3_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, MediumSize, TextData, 3, 4)
+}
+
+func BenchmarkDataDogZstdCompress10MB_Level7_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, MediumSize, TextData, 7, 4)
 }
 
 func BenchmarkDataDogZstdCompress100MB_Level1(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, LargeSize, TextData, 1)
+	benchmarkDataDogZstdCompress(b, LargeSize, TextData, 1, 1)
 }
 
 func BenchmarkDataDogZstdCompress100MB_Level3(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, LargeSize, TextData, 3)
+	benchmarkDataDogZstdCompress(b, LargeSize, TextData, 3, 1)
 }
 
 func BenchmarkDataDogZstdCompress100MB_Level7(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, LargeSize, TextData, 7)
+	benchmarkDataDogZstdCompress(b, LargeSize, TextData, 7, 1)
+}
+
+// Multi-worker DataDog benchmarks for 100MB
+func BenchmarkDataDogZstdCompress100MB_Level1_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, LargeSize, TextData, 1, 4)
+}
+
+func BenchmarkDataDogZstdCompress100MB_Level3_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, LargeSize, TextData, 3, 4)
+}
+
+func BenchmarkDataDogZstdCompress100MB_Level7_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, LargeSize, TextData, 7, 4)
 }
 
 func BenchmarkDataDogZstdCompressBinary1MB_Level1(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, SmallSize, BinaryData, 1)
+	benchmarkDataDogZstdCompress(b, SmallSize, BinaryData, 1, 1)
 }
 
 func BenchmarkDataDogZstdCompressBinary1MB_Level3(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, SmallSize, BinaryData, 3)
+	benchmarkDataDogZstdCompress(b, SmallSize, BinaryData, 3, 1)
 }
 
 func BenchmarkDataDogZstdCompressBinary1MB_Level7(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, SmallSize, BinaryData, 7)
+	benchmarkDataDogZstdCompress(b, SmallSize, BinaryData, 7, 1)
+}
+
+// Multi-worker DataDog Binary benchmarks
+func BenchmarkDataDogZstdCompressBinary1MB_Level1_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, SmallSize, BinaryData, 1, 4)
+}
+
+func BenchmarkDataDogZstdCompressBinary1MB_Level3_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, SmallSize, BinaryData, 3, 4)
+}
+
+func BenchmarkDataDogZstdCompressBinary1MB_Level7_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, SmallSize, BinaryData, 7, 4)
 }
 
 func BenchmarkDataDogZstdCompressBinary10MB_Level1(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, MediumSize, BinaryData, 1)
+	benchmarkDataDogZstdCompress(b, MediumSize, BinaryData, 1, 1)
 }
 
 func BenchmarkDataDogZstdCompressBinary10MB_Level3(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, MediumSize, BinaryData, 3)
+	benchmarkDataDogZstdCompress(b, MediumSize, BinaryData, 3, 1)
 }
 
 func BenchmarkDataDogZstdCompressBinary10MB_Level7(b *testing.B) {
-	benchmarkDataDogZstdCompress(b, MediumSize, BinaryData, 7)
+	benchmarkDataDogZstdCompress(b, MediumSize, BinaryData, 7, 1)
+}
+
+// Multi-worker DataDog Binary 10MB benchmarks
+func BenchmarkDataDogZstdCompressBinary10MB_Level1_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, MediumSize, BinaryData, 1, 4)
+}
+
+func BenchmarkDataDogZstdCompressBinary10MB_Level3_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, MediumSize, BinaryData, 3, 4)
+}
+
+func BenchmarkDataDogZstdCompressBinary10MB_Level7_Multi(b *testing.B) {
+	benchmarkDataDogZstdCompress(b, MediumSize, BinaryData, 7, 4)
 }
 
 // Benchmark DataDog zstd decompression
@@ -252,7 +386,7 @@ func BenchmarkDataDogZstdDecompressBinary10MB_Level7(b *testing.B) {
 	benchmarkDataDogZstdDecompress(b, MediumSize, BinaryData, 7)
 }
 
-// Helper function for benchmarking Klauspost compression
+// Helper function for benchmarking Klauspost compression (single worker)
 func benchmarkKlauspostZstdCompress(b *testing.B, size int, dataType string, level int) {
 	data := GenerateTestData(size, dataType)
 
@@ -277,6 +411,44 @@ func benchmarkKlauspostZstdCompress(b *testing.B, size int, dataType string, lev
 
 	enc, err := klauspost.NewWriter(nil, klauspost.WithEncoderLevel(encoderLevel))
 	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.ResetTimer()
+	b.SetBytes(int64(size))
+	for i := 0; i < b.N; i++ {
+		_ = enc.EncodeAll(data, nil)
+	}
+}
+
+// Helper function for benchmarking Klauspost compression with multiple workers
+func benchmarkKlauspostZstdCompressMulti(b *testing.B, size int, dataType string, level int, nbWorkers int) {
+	data := GenerateTestData(size, dataType)
+
+	// Map integer levels to klauspost EncoderLevel
+	var encoderLevel klauspost.EncoderLevel
+	switch level {
+	case 1:
+		encoderLevel = klauspost.SpeedFastest
+	case 3:
+		encoderLevel = klauspost.SpeedDefault
+	case 7:
+		encoderLevel = klauspost.SpeedBetterCompression
+	case 19, 20:
+		encoderLevel = klauspost.SpeedBestCompression
+	default:
+		encoderLevel = klauspost.SpeedDefault
+	}
+
+	// Create encoder with multiple workers
+	enc, err := klauspost.NewWriter(nil,
+		klauspost.WithEncoderLevel(encoderLevel),
+		klauspost.WithEncoderConcurrency(nbWorkers))
+
+	if err != nil {
+		if err.Error() == "concurrency disabled at build time" {
+			b.Skip("Klauspost ZSTD library was built without concurrency support")
+		}
 		b.Fatal(err)
 	}
 
@@ -341,9 +513,26 @@ func benchmarkKlauspostZstdDecompress(b *testing.B, size int, dataType string, l
 	}
 }
 
-// Helper function for benchmarking DataDog compression
-func benchmarkDataDogZstdCompress(b *testing.B, size int, dataType string, level int) {
+// Helper function for benchmarking DataDog compression with worker control
+func benchmarkDataDogZstdCompress(b *testing.B, size int, dataType string, level int, nbWorkers int) {
 	data := GenerateTestData(size, dataType)
+
+	// For DataDog's implementation, we need to create a writer to set workers
+	if nbWorkers > 1 {
+		// Try to compress a small sample to check if parallel compression is supported
+		var buf bytes.Buffer
+		writer := datadog.NewWriterLevel(&buf, level)
+
+		// Try to set workers
+		if err := writer.SetNbWorkers(nbWorkers); err == ErrNoParallelSupport {
+			b.Skip("DataDog ZSTD library does not support parallel compression")
+		} else if err != nil {
+			b.Fatal(err)
+		}
+
+		// Close the test writer
+		writer.Close()
+	}
 
 	b.ResetTimer()
 	b.SetBytes(int64(size))

@@ -50,12 +50,22 @@ func BenchmarkKlauspostGzipCompressBinary1MB_Level1(b *testing.B) {
 	benchmarkKlauspostGzipCompress(b, SmallSize, BinaryData, 1)
 }
 
+// Added Level 3 binary compression
+func BenchmarkKlauspostGzipCompressBinary1MB_Level3(b *testing.B) {
+	benchmarkKlauspostGzipCompress(b, SmallSize, BinaryData, 3)
+}
+
 func BenchmarkKlauspostGzipCompressBinary1MB_Level9(b *testing.B) {
 	benchmarkKlauspostGzipCompress(b, SmallSize, BinaryData, 9)
 }
 
 func BenchmarkKlauspostGzipCompressBinary10MB_Level1(b *testing.B) {
 	benchmarkKlauspostGzipCompress(b, MediumSize, BinaryData, 1)
+}
+
+// Added Level 3 binary compression
+func BenchmarkKlauspostGzipCompressBinary10MB_Level3(b *testing.B) {
+	benchmarkKlauspostGzipCompress(b, MediumSize, BinaryData, 3)
 }
 
 func BenchmarkKlauspostGzipCompressBinary10MB_Level9(b *testing.B) {
@@ -103,12 +113,22 @@ func BenchmarkKlauspostGzipDecompressBinary1MB_Level1(b *testing.B) {
 	benchmarkKlauspostGzipDecompress(b, SmallSize, BinaryData, 1)
 }
 
+// Added Level 3 binary decompression
+func BenchmarkKlauspostGzipDecompressBinary1MB_Level3(b *testing.B) {
+	benchmarkKlauspostGzipDecompress(b, SmallSize, BinaryData, 3)
+}
+
 func BenchmarkKlauspostGzipDecompressBinary1MB_Level9(b *testing.B) {
 	benchmarkKlauspostGzipDecompress(b, SmallSize, BinaryData, 9)
 }
 
 func BenchmarkKlauspostGzipDecompressBinary10MB_Level1(b *testing.B) {
 	benchmarkKlauspostGzipDecompress(b, MediumSize, BinaryData, 1)
+}
+
+// Added Level 3 binary decompression
+func BenchmarkKlauspostGzipDecompressBinary10MB_Level3(b *testing.B) {
+	benchmarkKlauspostGzipDecompress(b, MediumSize, BinaryData, 3)
 }
 
 func BenchmarkKlauspostGzipDecompressBinary10MB_Level9(b *testing.B) {
@@ -156,12 +176,22 @@ func BenchmarkStdlibGzipCompressBinary1MB_Level1(b *testing.B) {
 	benchmarkStdlibGzipCompress(b, SmallSize, BinaryData, 1)
 }
 
+// Added Level 3 binary compression
+func BenchmarkStdlibGzipCompressBinary1MB_Level3(b *testing.B) {
+	benchmarkStdlibGzipCompress(b, SmallSize, BinaryData, 3)
+}
+
 func BenchmarkStdlibGzipCompressBinary1MB_Level9(b *testing.B) {
 	benchmarkStdlibGzipCompress(b, SmallSize, BinaryData, 9)
 }
 
 func BenchmarkStdlibGzipCompressBinary10MB_Level1(b *testing.B) {
 	benchmarkStdlibGzipCompress(b, MediumSize, BinaryData, 1)
+}
+
+// Added Level 3 binary compression
+func BenchmarkStdlibGzipCompressBinary10MB_Level3(b *testing.B) {
+	benchmarkStdlibGzipCompress(b, MediumSize, BinaryData, 3)
 }
 
 func BenchmarkStdlibGzipCompressBinary10MB_Level9(b *testing.B) {
@@ -209,12 +239,22 @@ func BenchmarkStdlibGzipDecompressBinary1MB_Level1(b *testing.B) {
 	benchmarkStdlibGzipDecompress(b, SmallSize, BinaryData, 1)
 }
 
+// Added Level 3 binary decompression
+func BenchmarkStdlibGzipDecompressBinary1MB_Level3(b *testing.B) {
+	benchmarkStdlibGzipDecompress(b, SmallSize, BinaryData, 3)
+}
+
 func BenchmarkStdlibGzipDecompressBinary1MB_Level9(b *testing.B) {
 	benchmarkStdlibGzipDecompress(b, SmallSize, BinaryData, 9)
 }
 
 func BenchmarkStdlibGzipDecompressBinary10MB_Level1(b *testing.B) {
 	benchmarkStdlibGzipDecompress(b, MediumSize, BinaryData, 1)
+}
+
+// Added Level 3 binary decompression
+func BenchmarkStdlibGzipDecompressBinary10MB_Level3(b *testing.B) {
+	benchmarkStdlibGzipDecompress(b, MediumSize, BinaryData, 3)
 }
 
 func BenchmarkStdlibGzipDecompressBinary10MB_Level9(b *testing.B) {
@@ -426,14 +466,43 @@ func BenchmarkGzipCompressionRatio(b *testing.B) {
 	b.Run("Klauspost-Gzip-Binary-1MB-Level1", func(b *testing.B) {
 		measureGzipCompressionRatio(b, SmallSize, BinaryData, 1, "klauspost")
 	})
+	// Added Level 3 binary compression ratio test
+	b.Run("Klauspost-Gzip-Binary-1MB-Level3", func(b *testing.B) {
+		measureGzipCompressionRatio(b, SmallSize, BinaryData, 3, "klauspost")
+	})
 	b.Run("Klauspost-Gzip-Binary-1MB-Level9", func(b *testing.B) {
 		measureGzipCompressionRatio(b, SmallSize, BinaryData, 9, "klauspost")
 	})
+	// Added Level 3 binary compression ratio tests for 10MB
+	b.Run("Klauspost-Gzip-Binary-10MB-Level1", func(b *testing.B) {
+		measureGzipCompressionRatio(b, MediumSize, BinaryData, 1, "klauspost")
+	})
+	b.Run("Klauspost-Gzip-Binary-10MB-Level3", func(b *testing.B) {
+		measureGzipCompressionRatio(b, MediumSize, BinaryData, 3, "klauspost")
+	})
+	b.Run("Klauspost-Gzip-Binary-10MB-Level9", func(b *testing.B) {
+		measureGzipCompressionRatio(b, MediumSize, BinaryData, 9, "klauspost")
+	})
+
 	b.Run("Stdlib-Gzip-Binary-1MB-Level1", func(b *testing.B) {
 		measureGzipCompressionRatio(b, SmallSize, BinaryData, 1, "stdlib")
 	})
+	// Added Level 3 binary compression ratio test
+	b.Run("Stdlib-Gzip-Binary-1MB-Level3", func(b *testing.B) {
+		measureGzipCompressionRatio(b, SmallSize, BinaryData, 3, "stdlib")
+	})
 	b.Run("Stdlib-Gzip-Binary-1MB-Level9", func(b *testing.B) {
 		measureGzipCompressionRatio(b, SmallSize, BinaryData, 9, "stdlib")
+	})
+	// Added Level 3 binary compression ratio tests for 10MB
+	b.Run("Stdlib-Gzip-Binary-10MB-Level1", func(b *testing.B) {
+		measureGzipCompressionRatio(b, MediumSize, BinaryData, 1, "stdlib")
+	})
+	b.Run("Stdlib-Gzip-Binary-10MB-Level3", func(b *testing.B) {
+		measureGzipCompressionRatio(b, MediumSize, BinaryData, 3, "stdlib")
+	})
+	b.Run("Stdlib-Gzip-Binary-10MB-Level9", func(b *testing.B) {
+		measureGzipCompressionRatio(b, MediumSize, BinaryData, 9, "stdlib")
 	})
 
 	// Random data (should compress poorly)
