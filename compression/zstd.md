@@ -5,18 +5,14 @@ This analysis compares two Go implementations of the Zstandard compression algor
 * **klauspost/compress/zstd**: A pure Go implementation
 * **DataDog/zstd**: A CGo wrapper around the official C implementation
 
-# Go Support
-
-See https://github.com/golang/go/issues/62513
-
 ## Benchmark Setup
 
 **Environment**: Apple M1 Pro (darwin/arm64)
 
 **Test Parameters**:
 
-- **Compression Levels**: 1, 3, 7 (mapped appropriately between implementations)
-- **Data Sizes**: 1MB, 10MB, 100MB
+- **Compression Levels**: 1, 3 (mapped appropriately between implementations)
+- **Data Sizes**: 1MB, 10MB
 - **Data Types**: Text (with natural repetition) and binary (with patterns)
 - **Metrics**: Compression/decompression speed (MB/s) and compression ratio
 
@@ -26,73 +22,53 @@ See https://github.com/golang/go/issues/62513
 
 | Level | Implementation | Text (MB/s)    | Binary (MB/s)   | Notes                              |
 |-------|----------------|----------------|----------------|------------------------------------|
-| 1     | Klauspost      | 191.4-201.9    | 1571.6-1609.6  | Consistent across data sizes       |
-| 1     | DataDog        | 447.1-461.7    | 2791.9-3237.8  | ~2.3x faster than Klauspost        |
-| 3     | Klauspost      | 147.8-182.4    | 975.2-1078.7   |                                    |
-| 3     | DataDog        | 258.3-276.1    | 1444.4-1611.2  | Significantly faster               |
-| 7     | Klauspost      | 108.9-128.0    | 380.3-525.2    | Struggles with large binary files  |
-| 7     | DataDog        | 79.7-84.3      | 589.2-683.4    | Slower for text, faster for binary |
+| 1     | Klauspost      | 196.7-206.0    | 1592.4-1611.9  | Consistent across data sizes       |
+| 1     | DataDog        | 464.2-471.6    | 2901.0-3151.0  | ~2.3x faster than Klauspost        |
+| 3     | Klauspost      | 159.1-182.8    | 952.7-1193.9   |                                    |
+| 3     | DataDog        | 272.8-284.6    | 1444.8-1764.4  | Significantly faster               |
 
 ### Decompression Speed
 
 | Level | Implementation | Text (MB/s)    | Binary (MB/s)    | Notes                      |
 |-------|----------------|----------------|-----------------|----------------------------|
-| 1-7   | Klauspost      | 436.0-587.4    | 3228.2-3697.1   | Speed increases with level |
-| 1-7   | DataDog        | 1112.6-1313.1  | 3935.5-15870.7  | 2-4x faster than Klauspost |
+| 1     | Klauspost      | 471.5-483.6    | 3469.7-3772.7   | Speed increases with level |
+| 3     | Klauspost      | 475.1-525.9    | 3451.9-3800.5   |                            |
+| 1     | DataDog        | 1319.5-1360.6  | 7617.7-16114.5  | 2-4x faster than Klauspost |
+| 3     | DataDog        | 1185.3-1214.9  | 7747.7-15693.9  | Extraordinary binary speed |
 
 ### Compression Ratio
 
 | Level | Implementation | Text Ratio   | Binary Ratio | Notes                          |
 |-------|----------------|--------------|--------------|--------------------------------|
-| 1     | Klauspost      | 2.88-2.94    | 2.12         | Better than DataDog at level 1 |
-| 1     | DataDog        | 2.76-2.78    | 2.14         |                                |
-| 3     | Klauspost      | 3.13-3.21    | -            | Similar to DataDog             |
-| 3     | DataDog        | 3.07-3.25    | -            |                                |
-| 7     | Klauspost      | 3.20-3.53    | 2.15         |                                |
-| 7     | DataDog        | 3.34-3.57    | 2.15         | Slightly better at high levels |
-
-## Multi-Worker Performance
-
-Both implementations support parallel compression with multiple worker threads. The benchmark results using 4 workers show:
-
-| Implementation | Text Improvement | Binary Improvement | Notes                            |
-|----------------|------------------|-------------------|----------------------------------|
-| Klauspost      | 1-15%            | 1-12%             | Better scaling at higher levels  |
-| DataDog        | 0-1%             | -1-5%             | Minimal benefit from parallelism |
+| 1     | Klauspost      | 2.92-2.95    | 2.12         | Better than DataDog at level 1 |
+| 1     | DataDog        | 2.75-2.77    | 2.14         |                                |
+| 3     | Klauspost      | 3.08-3.21    | 2.14         | Similar to DataDog             |
+| 3     | DataDog        | 3.16-3.24    | 2.14         |                                |
 
 ## Key Insights
 
 1. **Implementation Tradeoffs**:
-    - DataDog (CGo): Excels at compression levels 1-3 for all data types and all decompression tasks
-    - Klauspost (Pure Go): Better at level 7 text compression (20% faster)
+    - DataDog (CGo): Excels at compression for all data types and all decompression tasks
+    - Klauspost (Pure Go): Competitive compression and consistent performance
     - For binary data, DataDog is consistently faster at all compression levels
 
 2. **Performance Patterns**:
     - Binary data compresses/decompresses significantly faster than text for both implementations
     - Decompression speed increases with compression level for Klauspost
-    - DataDog's decompression of binary data reaches extraordinary speeds (up to 15.9 GB/s)
+    - DataDog's decompression of binary data reaches extraordinary speeds (up to 16.1 GB/s)
 
 3. **Level Selection Impact**:
-    - Level 1 → 7 compression speed cost:
-        * Klauspost: 40-45% slower for text, ~70% slower for binary
-        * DataDog: ~5x slower for text, ~80% slower for binary
-    - Level 1 → 7 compression ratio gain:
-        * Klauspost: 11-20% improvement
-        * DataDog: 21-28% improvement
+    - Level 1 → 3 compression speed cost:
+        * Klauspost: ~15-20% slower for text, ~30-40% slower for binary
+        * DataDog: ~35-40% slower for text, ~40-55% slower for binary
+    - Level 1 → 3 compression ratio gain:
+        * Klauspost: ~5-9% improvement
+        * DataDog: ~15-17% improvement
 
 4. **Implementation Differences**:
     - DataDog's CGo approach provides exceptional binary data processing and decompression
     - Klauspost's pure Go implementation shows more balanced level scaling for text data
-    - DataDog's level 7 text compression is a performance bottleneck (5x slower than level 1)
-
-## Data Size Scaling
-
-Both implementations scale well with increasing data size:
-
-| Implementation | Size Scaling | Compression Speed | Decompression Speed |
-|----------------|--------------|-------------------|---------------------|
-| Klauspost      | 1MB → 100MB  | Consistent        | Consistent          |
-| DataDog        | 1MB → 100MB  | Consistent        | Slightly better     |
+    - DataDog achieves better compression ratios at level 3, while Klauspost is better at level 1
 
 ## Random Data Handling
 
@@ -107,22 +83,20 @@ For random data (which should be incompressible):
 | Decompression-heavy workloads            | DataDog                        | 2-4x faster decompression           |
 | Binary data processing                   | DataDog                        | Faster at all levels                 |
 | Level 1 compression                      | DataDog                        | 2.3x faster                          |
-| Level 7 text compression                 | Klauspost                      | Up to 50% faster                     |
 | Pure Go requirement                      | Klauspost                      | No CGo dependencies                  |
 | Read-heavy with tight memory constraints | DataDog                        | Superior decompression performance   |
-| Best compression ratio at high levels    | DataDog                        | Slightly better (3.57 vs 3.53)      |
-| Balanced performance across levels       | Klauspost                      | More gradual performance degradation |
+| Better level 1 compression ratio         | Klauspost                      | 5-6% better ratio                    |
+| Better level 3 compression ratio         | DataDog                        | Slightly better for 10MB data        |
 
 ## Conclusion
 
 Both implementations offer excellent performance with different strengths:
 
-- **DataDog/zstd** leverages the C implementation for exceptional decompression speed (up to 15.9 GB/s for binary data)
-  and faster compression of binary data at all levels. It achieves slightly better compression ratios at high levels but
-  performance drops significantly for text compression at level 7.
+- **DataDog/zstd** leverages the C implementation for exceptional decompression speed (up to 16.1 GB/s for binary data)
+  and faster compression of binary data at all levels. It achieves better compression ratios at level 3 but slightly worse at level 1.
 
-- **Klauspost/compress/zstd** provides solid performance in a pure Go implementation without CGo dependencies. It excels
-  particularly at high-level text compression and shows more consistent scaling across compression levels for text data.
+- **Klauspost/compress/zstd** provides solid performance in a pure Go implementation without CGo dependencies. It has better
+  compression ratios at level 1 and shows more consistent scaling across compression levels for text data.
 
 The choice depends primarily on your data type (text vs binary), compression level requirements, decompression needs,
 and whether CGo is acceptable in your environment.
@@ -130,35 +104,40 @@ and whether CGo is acceptable in your environment.
 ## Detailed Benchmark Results
 
 ```
-// Compression Speed - Level 1 (MB/s)
-Klauspost Text:     1MB: 191.4,  10MB: 191.5,  100MB: 196.8
-DataDog Text:       1MB: 447.1,  10MB: 461.7,  100MB: 457.3
-Klauspost Binary:   1MB: 1571.6, 10MB: 1584.8
-DataDog Binary:     1MB: 2838.0, 10MB: 3237.8
+// Compression Speed - Text (MB/s)
+Klauspost L1:  1MB: 196.65,  10MB: 205.98
+Klauspost L3:  1MB: 159.09,  10MB: 182.79
+DataDog L1:    1MB: 464.15,  10MB: 471.64
+DataDog L3:    1MB: 284.60,  10MB: 272.75
 
-// Compression Speed - Level 3 (MB/s)
-Klauspost Text:     1MB: 147.8,  10MB: 173.9,  100MB: 167.9
-DataDog Text:       1MB: 258.3,  10MB: 274.7,  100MB: 272.8
-Klauspost Binary:   1MB: 975.2,  10MB: 1078.7
-DataDog Binary:     1MB: 1469.8, 10MB: 1583.6
+// Compression Speed - Binary (MB/s)
+Klauspost L1:  1MB: 1611.86, 10MB: 1592.40
+Klauspost L3:  1MB: 952.70,  10MB: 1193.86
+DataDog L1:    1MB: 2901.03, 10MB: 3151.01
+DataDog L3:    1MB: 1764.41, 10MB: 1444.80
 
-// Compression Speed - Level 7 (MB/s)
-Klauspost Text:     1MB: 112.3,  10MB: 101.4,  100MB: 122.0
-DataDog Text:       1MB: 83.5,   10MB: 82.9,   100MB: 84.3
-Klauspost Binary:   1MB: 494.5,  10MB: 380.3
-DataDog Binary:     1MB: 591.6,  10MB: 651.3
+// Decompression Speed - Text (MB/s)
+Klauspost L1:  1MB: 471.48,  10MB: 483.60
+Klauspost L3:  1MB: 475.07,  10MB: 525.93
+DataDog L1:    1MB: 1360.62, 10MB: 1319.47
+DataDog L3:    1MB: 1214.94, 10MB: 1185.30
 
-// Decompression Speed (MB/s)
-Klauspost Text L1:  1MB: 452.6,  10MB: 454.6,  100MB: 457.9
-Klauspost Text L7:  1MB: 531.9,  10MB: 543.2,  100MB: 587.4
-DataDog Text L1:    1MB: 1295.0, 10MB: 1305.6, 100MB: 1313.1
-DataDog Text L7:    1MB: 1186.6, 10MB: 1242.1, 100MB: 1257.6
-Klauspost Binary:   1MB: ~3240,  10MB: ~3650
-DataDog Binary:     1MB: ~4250,  10MB: ~14760
+// Decompression Speed - Binary (MB/s)
+Klauspost L1:  1MB: 3469.65, 10MB: 3772.66
+Klauspost L3:  1MB: 3451.86, 10MB: 3800.52
+DataDog L1:    1MB: 7617.70, 10MB: 16114.47
+DataDog L3:    1MB: 7747.71, 10MB: 15693.93
 
 // Compression Ratio
-Klauspost Text L1:  1MB: 2.88,   10MB: 2.93,   100MB: 2.94
-Klauspost Text L7:  1MB: 3.20,   10MB: 3.50,   100MB: 3.53
-DataDog Text L1:    1MB: 2.76,   10MB: 2.78,   100MB: 2.77
-DataDog Text L7:    1MB: 3.34,   10MB: 3.56,   100MB: 3.57
+Klauspost L1:  1MB: 2.922, 10MB: 2.950
+Klauspost L3:  1MB: 3.082, 10MB: 3.206
+DataDog L1:    1MB: 2.751, 10MB: 2.766
+DataDog L3:    1MB: 3.163, 10MB: 3.239
+Klauspost Binary L1: 2.124
+Klauspost Binary L3: 2.141
+DataDog Binary L1:   2.140
+DataDog Binary L3:   2.138
+Random data:       1.000 (both implementations)
 ```
+
+Note: These benchmark results were collected on an Apple M1 Pro processor running Darwin/arm64. Performance may vary on different hardware and operating systems.
