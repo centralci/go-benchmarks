@@ -7,7 +7,7 @@ require (
 	github.com/DataDog/zstd v1.5.7
 	github.com/brianvoe/gofakeit/v7 v7.2.1
 	github.com/bytedance/sonic v1.13.2
-	github.com/goccy/go-yaml v1.16.0
+	github.com/goccy/go-yaml v1.17.1
 	github.com/klauspost/compress v1.18.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
