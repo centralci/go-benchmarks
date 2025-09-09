@@ -144,18 +144,162 @@ var (
 	jsonData1MB   []byte
 	jsonData10MB  []byte
 	jsonData100MB []byte
+	testData1MB   []TestData
+	testData10MB  []TestData
+	testData100MB []TestData
 )
 
 func init() {
 	// We'll generate data in init() to ensure it's available when tests run
 	fmt.Println("Generating 1MB test data...")
 	jsonData1MB = generateJSON(1)
+	json.Unmarshal(jsonData1MB, &testData1MB)
 
 	fmt.Println("Generating 10MB test data...")
 	jsonData10MB = generateJSON(10)
+	json.Unmarshal(jsonData10MB, &testData10MB)
 
 	fmt.Println("Generating 100MB test data...")
 	jsonData100MB = generateJSON(100)
+	json.Unmarshal(jsonData100MB, &testData100MB)
+}
+
+// 1MB String Output benchmarks
+func BenchmarkStdJSONToString1MB(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		bytes, err := json.Marshal(testData1MB)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = string(bytes)
+	}
+
+	b.SetBytes(int64(len(jsonData1MB)))
+}
+
+func BenchmarkSonicToString1MB(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		str, err := sonic.MarshalString(testData1MB)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = str
+	}
+
+	b.SetBytes(int64(len(jsonData1MB)))
+}
+
+func BenchmarkSonicFastestToString1MB(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		str, err := sonicFastest.MarshalToString(testData1MB)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = str
+	}
+
+	b.SetBytes(int64(len(jsonData1MB)))
+}
+
+// 10MB String Output benchmarks
+func BenchmarkStdJSONToString10MB(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		bytes, err := json.Marshal(testData10MB)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = string(bytes)
+	}
+
+	b.SetBytes(int64(len(jsonData10MB)))
+}
+
+func BenchmarkSonicToString10MB(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		str, err := sonic.MarshalString(testData10MB)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = str
+	}
+
+	b.SetBytes(int64(len(jsonData10MB)))
+}
+
+func BenchmarkSonicFastestToString10MB(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		str, err := sonicFastest.MarshalToString(testData10MB)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = str
+	}
+
+	b.SetBytes(int64(len(jsonData10MB)))
+}
+
+// 100MB String Output benchmarks
+func BenchmarkStdJSONToString100MB(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		bytes, err := json.Marshal(testData100MB)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = string(bytes)
+	}
+
+	b.SetBytes(int64(len(jsonData100MB)))
+}
+
+func BenchmarkSonicToString100MB(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		str, err := sonic.MarshalString(testData100MB)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = str
+	}
+
+	b.SetBytes(int64(len(jsonData100MB)))
+}
+
+func BenchmarkSonicFastestToString100MB(b *testing.B) {
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		str, err := sonicFastest.MarshalToString(testData100MB)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = str
+	}
+
+	b.SetBytes(int64(len(jsonData100MB)))
 }
 
 // 1MB benchmarks

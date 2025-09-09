@@ -11,7 +11,10 @@ and the experimental JSON v2 implementation across different data sizes and oper
 - **Go Version**: 1.25
 - **Sonic Version**: 1.14.1
 - **Data Sizes**: 1MB (250 rows), 10MB (2,500 rows), 100MB (25,000 rows)
-- **Operations**: Marshal (Go → JSON) and Unmarshal (JSON → Go)
+- **Operations**:
+    - Marshal (Go → JSON bytes)
+    - Unmarshal (JSON → Go)
+    - ToString (Go → JSON string)
 - **Libraries**:
     - Go standard library (encoding/json)
     - Go experimental JSON v2 (GOEXPERIMENT=jsonv2)
@@ -24,45 +27,57 @@ and the experimental JSON v2 implementation across different data sizes and oper
 
 | Operation | Size  | Ops/sec | Time (ns/op) | Throughput (MB/s) | Memory (B/op) | Allocations |
 |-----------|-------|---------|--------------|-------------------|---------------|-------------|
-| Marshal   | 1MB   | 1,959   | 610,353      | 882.83            | 541,784       | 2           |
-| Marshal   | 10MB  | 193     | 6,165,694    | 874.80            | 5,398,654     | 2           |
-| Marshal   | 100MB | 18      | 62,439,028   | 864.20            | 61,418,554    | 4           |
-| Unmarshal | 1MB   | 379     | 3,125,512    | 172.40            | 748,480       | 7,010       |
-| Unmarshal | 10MB  | 38      | 31,286,201   | 172.40            | 8,231,273     | 69,959      |
-| Unmarshal | 100MB | 4       | 314,478,188  | 171.58            | 105,354,036   | 699,480     |
+| Marshal   | 1MB   | 1,942   | 616,655      | 873.72            | 541,788       | 2           |
+| Marshal   | 10MB  | 193     | 6,183,486    | 872.50            | 5,572,563     | 2           |
+| Marshal   | 100MB | 19      | 61,751,412   | 873.41            | 61,001,653    | 4           |
+| ToString  | 1MB   | 1,870   | 629,225      | 856.27            | 1,090,406     | 3           |
+| ToString  | 10MB  | 163     | 6,674,942    | 808.26            | 11,827,045    | 5           |
+| ToString  | 100MB | 14      | 73,166,387   | 737.15            | 174,991,918   | 23          |
+| Unmarshal | 1MB   | 379     | 3,122,794    | 172.53            | 748,576       | 7,010       |
+| Unmarshal | 10MB  | 38      | 31,535,310   | 171.08            | 8,234,969     | 69,958      |
+| Unmarshal | 100MB | 4       | 316,455,167  | 170.43            | 105,325,484   | 699,505     |
 
 ### Experimental JSON v2 (GOEXPERIMENT=jsonv2)
 
 | Operation | Size  | Ops/sec | Time (ns/op) | Throughput (MB/s) | Memory (B/op) | Allocations |
 |-----------|-------|---------|--------------|-------------------|---------------|-------------|
-| Marshal   | 1MB   | 1,927   | 624,070      | 863.65            | 542,046       | 3           |
-| Marshal   | 10MB  | 188     | 6,300,620    | 856.24            | 5,539,678     | 3           |
-| Marshal   | 100MB | 18      | 65,392,123   | 825.02            | 88,911,580    | 9           |
-| Unmarshal | 1MB   | 776     | 1,505,468    | 358.01            | 743,571       | 6,533       |
-| Unmarshal | 10MB  | 78      | 15,071,988   | 357.94            | 8,198,108     | 65,356      |
-| Unmarshal | 100MB | 7       | 154,660,244  | 348.83            | 104,950,678   | 653,108     |
+| Marshal   | 1MB   | 1,881   | 647,621      | 833.57            | 542,074       | 3           |
+| Marshal   | 10MB  | 183     | 6,477,885    | 832.38            | 5,398,637     | 3           |
+| Marshal   | 100MB | 16      | 65,046,706   | 829.46            | 73,625,289    | 6           |
+| ToString  | 1MB   | 1,814   | 674,643      | 800.18            | 1,093,988     | 4           |
+| ToString  | 10MB  | 168     | 7,201,848    | 748.70            | 12,848,307    | 7           |
+| ToString  | 100MB | 13      | 80,582,388   | 669.55            | 374,146,762   | 51          |
+| Unmarshal | 1MB   | 675     | 1,538,335    | 350.92            | 744,818       | 6,548       |
+| Unmarshal | 10MB  | 78      | 15,746,964   | 342.42            | 8,194,827     | 65,320      |
+| Unmarshal | 100MB | 7       | 159,448,661  | 338.38            | 104,961,381   | 653,396     |
 
 ### Sonic Standard
 
 | Operation | Size  | Ops/sec | Time (ns/op) | Throughput (MB/s) | Memory (B/op) | Allocations |
 |-----------|-------|---------|--------------|-------------------|---------------|-------------|
-| Marshal   | 1MB   | 2,562   | 449,775      | 1,198.33          | 540,738       | 3           |
-| Marshal   | 10MB  | 228     | 5,158,108    | 1,045.90          | 23,216,768    | 25          |
-| Marshal   | 100MB | 22      | 50,555,526   | 1,067.15          | 206,166,227   | 33          |
-| Unmarshal | 1MB   | 2,384   | 482,393      | 1,117.30          | 665,167       | 508         |
-| Unmarshal | 10MB  | 237     | 4,979,802    | 1,083.35          | 33,151,878    | 5,026       |
-| Unmarshal | 100MB | 22      | 49,441,763   | 1,091.18          | 483,697,166   | 50,245      |
+| Marshal   | 1MB   | 2,628   | 457,356      | 1,180.35          | 541,042       | 3           |
+| Marshal   | 10MB  | 207     | 5,333,467    | 1,010.98          | 18,681,198    | 23          |
+| Marshal   | 100MB | 21      | 52,044,865   | 1,036.68          | 184,980,011   | 32          |
+| ToString  | 1MB   | 2,628   | 469,392      | 1,150.08          | 541,879       | 3           |
+| ToString  | 10MB  | 222     | 5,292,330    | 1,018.84          | 18,680,538    | 23          |
+| ToString  | 100MB | 22      | 52,408,968   | 1,029.48          | 184,978,892   | 31          |
+| Unmarshal | 1MB   | 2,358   | 500,648      | 1,078.28          | 672,278       | 508         |
+| Unmarshal | 10MB  | 223     | 5,488,916    | 982.35            | 33,404,348    | 5,032       |
+| Unmarshal | 100MB | 22      | 49,587,256   | 1,088.06          | 481,182,032   | 50,238      |
 
 ### Sonic Fastest
 
 | Operation | Size  | Ops/sec | Time (ns/op) | Throughput (MB/s) | Memory (B/op) | Allocations |
 |-----------|-------|---------|--------------|-------------------|---------------|-------------|
-| Marshal   | 1MB   | 2,572   | 447,438      | 1,204.59          | 540,738       | 3           |
-| Marshal   | 10MB  | 230     | 5,151,831    | 1,047.17          | 23,217,372    | 25          |
-| Marshal   | 100MB | 20      | 50,988,033   | 1,058.09          | 206,166,730   | 33          |
-| Unmarshal | 1MB   | 2,395   | 480,562      | 1,121.56          | 666,044       | 508         |
-| Unmarshal | 10MB  | 238     | 5,030,564    | 1,072.42          | 33,183,377    | 5,026       |
-| Unmarshal | 100MB | 24      | 49,123,267   | 1,098.26          | 483,484,825   | 50,245      |
+| Marshal   | 1MB   | 2,638   | 462,730      | 1,166.64          | 540,829       | 3           |
+| Marshal   | 10MB  | 226     | 5,166,940    | 1,043.56          | 18,681,146    | 23          |
+| Marshal   | 100MB | 21      | 53,160,296   | 1,014.93          | 184,980,078   | 32          |
+| ToString  | 1MB   | 2,485   | 521,106      | 1,035.95          | 542,885       | 3           |
+| ToString  | 10MB  | 228     | 5,297,964    | 1,017.76          | 18,681,761    | 23          |
+| ToString  | 100MB | 22      | 52,228,426   | 1,033.03          | 184,972,561   | 31          |
+| Unmarshal | 1MB   | 2,392   | 500,321      | 1,078.98          | 667,791       | 508         |
+| Unmarshal | 10MB  | 218     | 5,327,794    | 1,012.06          | 33,238,565    | 5,032       |
+| Unmarshal | 100MB | 22      | 49,629,062   | 1,087.14          | 483,730,181   | 50,238      |
 
 ## Performance Comparisons
 
@@ -70,134 +85,207 @@ and the experimental JSON v2 implementation across different data sizes and oper
 
 | Size  | JSON v2 | Sonic  | Sonic Fastest |
 |-------|---------|--------|---------------|
-| 1MB   | -2.2%   | +35.7% | +36.4%        |
-| 10MB  | -2.1%   | +19.6% | +19.7%        |
-| 100MB | -4.5%   | +23.5% | +22.5%        |
+| 1MB   | -4.8%   | +34.9% | +33.3%        |
+| 10MB  | -4.5%   | +15.9% | +19.7%        |
+| 100MB | -5.1%   | +18.7% | +16.2%        |
+
+### ToString Performance (Relative to Standard JSON)
+
+| Size  | JSON v2 | Sonic  | Sonic Fastest |
+|-------|---------|--------|---------------|
+| 1MB   | -6.7%   | +34.0% | +20.7%        |
+| 10MB  | -7.4%   | +26.1% | +26.0%        |
+| 100MB | -9.2%   | +39.5% | +40.0%        |
 
 ### Unmarshal Performance (Relative to Standard JSON)
 
 | Size  | JSON v2 | Sonic   | Sonic Fastest |
 |-------|---------|---------|---------------|
-| 1MB   | +107.6% | +548.0% | +550.3%       |
-| 10MB  | +107.6% | +528.4% | +522.0%       |
-| 100MB | +103.3% | +536.0% | +540.2%       |
+| 1MB   | +103.0% | +523.7% | +524.0%       |
+| 10MB  | +100.2% | +474.7% | +492.1%       |
+| 100MB | +98.5%  | +538.3% | +537.8%       |
 
 ## Key Findings
 
-### 1. JSON v2 Performance Characteristics
+### 1. JSON v2 String Output Performance
 
-#### Marshaling
+**Surprising Result**: JSON v2 performs **worse** than standard JSON for string output:
 
-- **Performance**: JSON v2 is slightly slower than the current standard library (2-5% slower)
-- **Memory**: Uses comparable memory to standard JSON, with 1 additional allocation
-- **Scaling**: Degrades more noticeably with larger datasets (100MB shows 4.5% slower performance)
+- **1MB**: 6.7% slower
+- **10MB**: 7.4% slower
+- **100MB**: 9.2% slower
 
-#### Unmarshaling
+**Memory Impact**: JSON v2 uses significantly more memory for string output:
 
-- **Performance**: JSON v2 is ~2x faster than standard JSON, a significant improvement
-- **Memory**: Uses slightly less memory with fewer allocations (6-7% reduction)
-- **Consistency**: Maintains ~358 MB/s throughput for small data, ~349 MB/s for large data
+- **100MB**: 374MB vs 175MB (2.14x more than standard JSON)
+- More allocations: 51 vs 23 for 100MB
 
-### 2. Sonic Performance Advantages
+This suggests JSON v2's experimental implementation hasn't optimized the string conversion path yet.
 
-#### Against Standard JSON
+### 2. Sonic's String Output Dominance
 
-- **Marshal**: 20-36% faster depending on size
-- **Unmarshal**: 5.2-5.5x faster across all sizes
+**Performance Gains over Standard JSON**:
 
-#### Against JSON v2
+- **1MB**: 34-34% faster
+- **10MB**: 26% faster
+- **100MB**: 39-40% faster
 
-- **Marshal**: 22-40% faster
-- **Unmarshal**: 2.6-3.2x faster
+**Performance Gains over JSON v2**:
 
-### 3. Memory Trade-offs
+- **1MB**: 43-44% faster
+- **10MB**: 36% faster
+- **100MB**: 53-54% faster
 
-| Library       | Marshal Memory Usage                          | Unmarshal Memory Usage           |
-|---------------|-----------------------------------------------|----------------------------------|
-| Standard JSON | Baseline                                      | Baseline                         |
-| JSON v2       | Similar to standard (+0.1% to +45% for 100MB) | Slightly less (-0.4% to -0.6%)   |
-| Sonic         | 1MB: Similar; 10MB: 4.3x; 100MB: 3.4x         | 1MB: -11%; 10MB: 4x; 100MB: 4.6x |
+Sonic's `MarshalToString()` consistently outperforms both standard and v2 implementations.
 
-### 4. Allocation Patterns
+### 3. Marshal Performance Rankings
 
-- **Standard JSON**: Minimal allocations for marshal (2-4), massive for unmarshal (7K-699K)
-- **JSON v2**: Similar to standard but slightly fewer unmarshal allocations (6.5K-653K)
-- **Sonic**: More marshal allocations (3-33) but dramatically fewer unmarshal allocations (508-50K)
+**Winners by Size**:
+
+- **1MB**: Sonic Standard (1,180 MB/s)
+- **10MB**: Sonic Fastest (1,044 MB/s)
+- **100MB**: Sonic Standard (1,037 MB/s)
+
+**JSON v2 Marshal**: Consistently 4-5% slower than standard JSON, suggesting regression in the experimental version.
+
+### 4. Unmarshal Performance Analysis
+
+**JSON v2 Improvements**:
+
+- Delivers on promise: ~2x faster than standard JSON
+- 350 MB/s vs 172 MB/s throughput
+- 6.5K allocations vs 7K (slight improvement)
+
+**Sonic Dominance**:
+
+- 5.2x faster than standard JSON
+- 2.6x faster than JSON v2
+- 1,078-1,088 MB/s throughput
+
+### 5. Memory Usage Patterns
+
+| Operation    | Library  | 1MB Memory | 10MB Memory   | 100MB Memory |
+|--------------|----------|------------|---------------|--------------|
+| **Marshal**  |          |            |               |              |
+|              | Standard | 542KB      | 5.4MB         | 61MB         |
+|              | JSON v2  | 542KB      | 5.4MB         | 74MB (+21%)  |
+|              | Sonic    | 541KB      | 18.7MB (3.5x) | 185MB (3x)   |
+| **ToString** |          |            |               |              |
+|              | Standard | 1.1MB      | 11.8MB        | 175MB        |
+|              | JSON v2  | 1.1MB      | 12.8MB        | 374MB (2.1x) |
+|              | Sonic    | 542KB      | 18.7MB        | 185MB        |
 
 ## Analysis by Use Case
 
-### 1. Conservative Upgrade Path (JSON v2)
+### 1. String Output for APIs
 
-**Pros:**
+**Clear Winner**: Sonic
 
-- 2x faster unmarshaling with minimal code changes
-- Slightly reduced memory usage for unmarshaling
-- Maintains similar memory profile to standard library
-- Official Go experimental feature
+- 34-40% faster than standard JSON
+- 43-54% faster than JSON v2
+- Direct string generation without conversion overhead
 
-**Cons:**
+**Avoid**: JSON v2 for string output (slower and uses more memory)
 
-- Slightly slower marshaling (2-5%)
-- Still significantly slower than Sonic
-- Experimental status may change
+### 2. Conservative Upgrade Path
 
-**Best for:** Teams wanting moderate improvements without external dependencies
+**Recommendation**: JSON v2 for **unmarshaling only**
 
-### 2. Maximum Performance (Sonic)
+- 2x faster unmarshaling as promised
+- Marshal performance regression makes it unsuitable for write-heavy workloads
+- String output performance is particularly poor
 
-**Pros:**
+### 3. Maximum Performance
 
-- 20-36% faster marshaling
-- 5.2-5.5x faster unmarshaling
-- Consistent high throughput across all sizes
-- Production-proven at ByteDance scale
+**Recommendation**: Sonic (Standard or Fastest)
 
-**Cons:**
+- 5x faster unmarshaling
+- 15-35% faster marshaling
+- 26-40% faster string output
 
-- External dependency
-- Significantly higher memory usage for large datasets
-- More complex memory allocation patterns
+### 4. Memory-Constrained Systems
 
-**Best for:** High-throughput services where performance is critical
+**Recommendation**: Standard JSON
 
-### 3. Current Standard Library
+- Lowest memory footprint
+- JSON v2 surprisingly uses more memory in some cases
+- Sonic uses 3-4x memory for large payloads
 
-**Pros:**
+## Recommendations by Workload
 
-- No dependencies or experimental flags
-- Predictable, well-understood behavior
-- Minimal memory footprint for marshaling
+### Read-Heavy Services (80%+ Unmarshal)
 
-**Cons:**
+1. **Sonic**: 5x improvement dominates
+2. **JSON v2**: Acceptable 2x improvement if avoiding dependencies
+3. **Standard**: Only if memory is critical
 
-- Slowest performance across all operations
-- Massive allocation count for unmarshaling
+### Write-Heavy Services (80%+ Marshal)
 
-**Best for:** Simple applications or memory-constrained environments
+1. **Sonic**: 15-35% improvement
+2. **Standard JSON**: Reliable, low memory
+3. **Avoid JSON v2**: 5% regression
 
-## Recommendations
+### API Services (String Output)
 
-1. **For API Services**: Use Sonic for maximum throughput, especially if handling large request volumes
+1. **Sonic MarshalToString()**: 34-40% faster
+2. **Standard JSON**: Acceptable performance
+3. **Avoid JSON v2**: 6-9% slower with 2x memory
 
-2. **For Conservative Teams**: Consider JSON v2 as it offers significant unmarshal improvements with minimal risk
+### Balanced Workloads
 
-3. **For Memory-Constrained Systems**: Stick with standard JSON or carefully evaluate JSON v2
+1. **Sonic**: Best overall performance
+2. **JSON v2**: Only if unmarshal matters more
+3. **Standard**: For stability and memory efficiency
 
-4. **For Mixed Workloads**:
-    - Heavy unmarshaling: Sonic provides 5x improvement
-    - Heavy marshaling: Sonic provides 20-36% improvement
-    - Balanced: JSON v2 offers a reasonable middle ground
+## Code Examples
 
-5. **Migration Strategy**:
-    - Start with JSON v2 for easy 2x unmarshal gains
-    - Move to Sonic for services requiring maximum performance
-    - Keep standard JSON for stable, low-traffic services
+### Standard JSON (Avoid for APIs)
 
-## Conclusion
+```go
+data, _ := json.Marshal(obj)
+str := string(data) // Extra allocation and copy
+// 1MB: 1.1MB memory used
+```
 
-The experimental JSON v2 provides a solid middle ground with 2x faster unmarshaling while maintaining compatibility and
-similar memory characteristics to the standard library. However, Sonic remains the clear performance leader with 5x
-faster unmarshaling and significant marshaling improvements, making it the best choice for performance-critical
-applications despite its higher memory usage. The JSON v2 experiment shows Go's commitment to improving JSON
-performance, but third-party solutions like Sonic still offer superior performance for teams willing to take on external
-dependencies.
+### JSON v2 (Worse for strings)
+
+```go
+// With GOEXPERIMENT=jsonv2
+data, _ := json.Marshal(obj)
+str := string(data) // Even worse performance
+// 100MB: 374MB memory used (!)
+```
+
+### Sonic (Optimal)
+
+```go
+str, _ := sonic.MarshalToString(obj) // Direct generation
+// Consistent memory usage, 40% faster
+```
+
+## Conclusion (Sep 2025)
+
+The experimental JSON v2 shows mixed results:
+
+- ✅ **Delivers** on unmarshal performance (2x faster)
+- ❌ **Regresses** on marshal performance (5% slower)
+- ❌ **Significantly worse** for string output (9% slower, 2x memory)
+
+**Sonic remains the clear performance leader** across all operations:
+
+- 5x faster unmarshaling
+- 15-35% faster marshaling
+- 34-40% faster string output
+- Consistent performance across all data sizes
+
+**JSON v2's experimental status is evident** - while unmarshal improvements are solid, the marshal and string output
+regressions suggest it's not ready for production use in write-heavy or API scenarios.
+
+For production systems, the choice is between:
+
+1. **Sonic** for maximum performance (if you can accept external dependencies)
+2. **Standard JSON** for stability and memory efficiency
+3. **JSON v2** only for read-heavy workloads where unmarshal performance is critical
+
+The string output benchmarks particularly highlight Sonic's advantage for modern API services, where JSON responses are
+common and the 40% performance improvement can significantly impact latency and throughput.
